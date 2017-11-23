@@ -23,19 +23,22 @@ sf::RenderWindow* Display::getWindow()
 	return this->window;
 }
 
-void Display::DisplayGrid(std::vector<Cell> grid, sf::Color color)
+void Display::DisplayGrid(std::vector<Cell*> grid, sf::Color color)
 {
 	float w = width / cols;
 	float h = height / rows;
 
 	sf::RectangleShape rect;
 	rect.setSize((sf::Vector2f( w -1, h -1)));
-	rect.setFillColor(color);
 	auto it = grid.begin();
 
 	while( it != grid.end())
 	{
-		rect.setPosition(sf::Vector2f( w * it->position.x, h * it->position.y));
+		if ((*it)->wall == true)
+			rect.setFillColor(sf::Color::Black);
+		else
+			rect.setFillColor(color);
+		rect.setPosition(sf::Vector2f( w * (*it)->position.x, h * (*it)->position.y));
 		window->draw(rect);
 		++it;
 	}

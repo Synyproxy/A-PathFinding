@@ -12,14 +12,16 @@ namespace A_Star
 		float g;
 		float h;
 		sf::Vector2f position;
-		std::vector<Cell> neighbors;
+		std::vector<Cell*> neighbors;
+		Cell *previous;
+		bool wall;
 
 	public:
 		explicit Cell(sf::Vector2f position);
 		~Cell();
 		Cell(const Cell &other);
 
-		void AddNeighbors(std::vector<Cell> grid, int cols, int rows);
+		void AddNeighbors(std::vector<Cell*> grid, int cols, int rows);
 		Cell &getInstance();
 
 		bool operator==(const Cell &other);

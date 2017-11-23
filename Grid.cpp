@@ -6,10 +6,10 @@ using namespace A_Star;
 Grid::Grid(int rows, int cols, sf::Vector2f startPos, sf::Vector2f endPos):
 	rows {rows},
 	cols {cols},
-	start {Cell(startPos)},
-	end {Cell(endPos)}
+	start {new Cell(startPos)},
+	end {new Cell(endPos)},
+	searching {true}
 {
-
 }
 
 Grid::~Grid()
@@ -19,72 +19,97 @@ Grid::~Grid()
 void Grid::Setup()
 {
 	for(int i = 0; i < this->cols; ++i)
-	{
 		for (int j = 0; j < this->rows; ++j)
-		{
-			Cell *newCell = new Cell(sf::Vector2f(i, j));
-			this->grid.push_back(*newCell);
-		}
-	}
+			this->grid.push_back(new Cell(sf::Vector2f(i, j)));
 
 	for (auto it = this->grid.begin(); it != this->grid.end(); ++it)
-		it->AddNeighbors(this->grid, this->cols, this->rows);
-	this->start = grid.front();
-	this->end = grid.back();
+		(*it)->AddNeighbors(this->grid, this->cols, this->rows);
+
+	this->start = this->grid.front();
+	this->end = this->grid.back();
+	
 	this->openSet.push_back(this->start);
 }
 
 void Grid::Update()
 {
-	int openSetSize = openSet.size();
-	int winner = 0;
+	int openSetSize = this->openSet.size();
+	int winner = 0;  // Counter
+	Cell *current = nullptr;	// Current Node
+	std::vector<Cell*> neighbors; //Neighbors
+	int neighborsCount = 0;
+	Cell *neighbor = nullptr;
+	float tempG = 0;
+	Cell* pathNode;
+	bool newPath = false;
 
 	if(!this->openSet.empty())
 	{
 		//Keep Going
 		for(int i = 0; i < openSetSize; ++i)
-		{
-			if (openSet[i].f < openSet[winner].f)
+			if (this->openSet[i]->f < this->openSet[winner]->f)
 				winner = i;
-		}
-		Cell current = openSet[winner];
+				
+		current = this->openSet[winner];
 
-		if (current == end)
+		this->path.clear();
+		pathNode = current;
+		this->path.push_back(pathNode);
+		while (pathNode->previous)
 		{
-			std::cout << "Done" << std::endl;
+			this->path.push_back(pathNode->previous);
+			pathNode = pathNode->previous;
+		}
+
+		//FoundSolution
+		if (current == this->end)
+		{
+			pathNode = current;
+			this->path.push_back(pathNode);
+			while (pathNode->previous)
+			{
+				this->path.push_back(pathNode->previous);
+				pathNode = pathNode->previous;
+			}
+			this->searching = false;
 		}
 
 		Remove(current);
 		this->closedSet.push_back(current);
 
-		std::vector<Cell> neighbors = current.neighbors;
-		int neighborsCount = neighbors.size();
-		float tempG;
-
+		neighbors = current->neighbors;
+		neighborsCount = neighbors.size();
+		
 		for (int i = 0; i < neighborsCount; ++i)
 		{
-			Cell neighbor = neighbors[i];
-			//Copy Neighbors properly 
-			neighbor.AddNeighbors(this->grid, this->cols, this->rows);
+			neighbor = neighbors[i];
 
-			if(!Includes( this->closedSet,neighbor))
+			//These are not possible spots
+			if(!Includes( this->closedSet,neighbor) && !neighbor->wall)
 			{
-				tempG = current.g + 1;
+				tempG = current->g + 1;
 
 				//Its in the openSet
 				if(Includes(this->openSet, neighbor))
 				{
-					if (tempG < neighbor.g)
+					if (tempG < neighbor->g)
 					{
-						neighbor.g = tempG;
+						neighbor->g = tempG;
+						newPath = true;
 					}	
+						
 				}else // Not in openSet
 				{
-					neighbor.g = tempG;
+					neighbor->g = tempG;
+					newPath = true;
 					this->openSet.push_back(neighbor);
 				}
-				neighbor.h = Heuristic(neighbor, this->end);
-				neighbor.f = neighbor.g + neighbor.h;
+				if(newPath)
+				{
+					neighbor->h = Heuristic(neighbor, this->end);
+					neighbor->f = neighbor->g + neighbor->h;
+					neighbor->previous = current;
+				}
 			}
 		}
 	}
@@ -94,22 +119,27 @@ void Grid::Update()
 	}
 }
 
-std::vector<Cell> Grid::getGrid() const
+std::vector<Cell*> Grid::getGrid() const
 {
 	return this->grid;
 }
 
-std::vector<Cell> Grid::getOpenSet() const
+std::vector<Cell*> Grid::getOpenSet() const
 {
 	return this->openSet;
 }
 
-std::vector<Cell> Grid::getClosedSet() const
+std::vector<Cell*> Grid::getClosedSet() const
 {
 	return this->closedSet;
 }
 
-void Grid::Remove(Cell element)
+std::vector<Cell*> Grid::getpath() const
+{
+	return this->path;
+}
+
+void Grid::Remove(Cell *element)
 {
 	auto it = this->openSet.begin();
 	int index = 0;
@@ -129,7 +159,7 @@ void Grid::Remove(Cell element)
 	this->openSet.erase(this->openSet.begin() + index);
 }
 
-bool Grid::Includes(std::vector<Cell> grid, Cell element)
+bool Grid::Includes(std::vector<Cell*> grid, Cell *element)
 {
 	auto it = grid.begin();
 
@@ -142,8 +172,21 @@ bool Grid::Includes(std::vector<Cell> grid, Cell element)
 	return false;
 }
 
-float Grid::Heuristic(Cell current, Cell end)
+float Grid::Heuristic(Cell *current, Cell *end)
 {
+	//Euclidian Distance
+	int distX = abs(end->position.x - current->position.x);
+	int distY = abs(end->position.y - current->position.y);
+
+	int distance = sqrt(distX * distX + distY * distY);
+
+	return distance;
+
 	//Manhatan Distance 
-	return (abs(current.position.x - end.position.x) + abs(current.position.y - end.position.y));
+	//return (abs(current->position.x - end->position.x) + abs(current->position.y - end->position.y));
+}
+
+bool Grid::IsSearching()
+{
+	return this->searching;
 }

@@ -21,7 +21,7 @@ namespace A_Star
 		explicit Display(int width, int height, int rows, int cols);
 		~Display();
 		sf::RenderWindow *getWindow();
-		void DisplayGrid(std::vector<Cell> grid, sf::Color color);
+		void DisplayGrid(std::vector<Cell*> grid, sf::Color color);
 	};
 }
 #endif // A_STAR_DISPLAY_H

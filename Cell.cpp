@@ -1,5 +1,6 @@
-#include "Cell.h"
 #include <iostream>
+#include "Cell.h"
+#include <random>
 
 using namespace A_Star;
 
@@ -9,6 +10,15 @@ Cell::Cell(sf::Vector2f position) :
 	h {0},
 	position{position}
 {
+	this->wall = false;
+	///*
+	std::random_device rd; // obtain a random number from hardware
+	std::mt19937 eng(rd()); // seed the generator
+	std::uniform_int_distribution<> distr(1, 3); // define the range
+	
+	if (distr(eng) % 3 == 0)
+		this->wall = true;
+	//*/
 }
 
 
@@ -26,8 +36,9 @@ Cell::Cell(const Cell &other)
 }
 
 
-void Cell::AddNeighbors(std::vector<Cell> grid, int cols, int rows)
+void Cell::AddNeighbors(std::vector<Cell*> grid, int cols, int rows)
 {
+	//TODO This only works with square grids
 	int x = this->position.x;
 	int y = this->position.y;
 	int index = 0;
@@ -53,6 +64,30 @@ void Cell::AddNeighbors(std::vector<Cell> grid, int cols, int rows)
 	if (y > 0)
 	{
 		index = (x * cols) + (y - 1);
+		this->neighbors.push_back(grid[index]);
+	}
+
+	if( x > 0 && y > 0 )
+	{
+		index = ((x  - 1) * cols) + (y - 1);
+		this->neighbors.push_back(grid[index]);
+	}
+
+	if (x < cols - 1 && y > 0)
+	{
+		index = ((x + 1) * cols) + (y - 1);
+		this->neighbors.push_back(grid[index]);
+	}
+
+	if (x > 0 && y < rows - 1)
+	{
+		index = ((x - 1) * cols) + (y + 1);
+		this->neighbors.push_back(grid[index]);
+	}
+
+	if (x < cols - 1 && y < rows - 1)
+	{
+		index = ((x + 1) * cols) + (y + 1);
 		this->neighbors.push_back(grid[index]);
 	}
 }
