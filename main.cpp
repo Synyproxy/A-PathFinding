@@ -8,10 +8,10 @@ using namespace A_Star;
 int main(int argc, char* argv[])
 {
 	sf::Time delay = sf::seconds(0.1f);
-	int width = 600;
-	int height = 600;
-	int rows = 50;
-	int cols = 50;
+	int width = 1000;
+	int height = 1000;
+	int rows = 100;
+	int cols = 100;
 	sf::Vector2f star(0, 0);
 	sf::Vector2f end( rows -1, cols -1);
 
@@ -35,12 +35,11 @@ int main(int argc, char* argv[])
 
 		window->clear();
 		display.DisplayGrid(grid.getGrid(), sf::Color::White);
-		display.DisplayGrid(grid.getClosedSet(), sf::Color::Red);
 		display.DisplayGrid(grid.getOpenSet(), sf::Color::Green);
+		display.DisplayGrid(grid.getClosedSet(), sf::Color::Red);
 		display.DisplayGrid(grid.getpath(), sf::Color::Blue);
 		window->display();
 		//sf::sleep(delay);
-
 	}
 
 	return 0;

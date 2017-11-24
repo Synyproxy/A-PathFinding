@@ -25,6 +25,9 @@ void Grid::Setup()
 	for (auto it = this->grid.begin(); it != this->grid.end(); ++it)
 		(*it)->AddNeighbors(this->grid, this->cols, this->rows);
 
+	grid.front()->wall = false;
+	grid.back()->wall = false;
+
 	this->start = this->grid.front();
 	this->end = this->grid.back();
 	
@@ -175,15 +178,18 @@ bool Grid::Includes(std::vector<Cell*> grid, Cell *element)
 float Grid::Heuristic(Cell *current, Cell *end)
 {
 	//Euclidian Distance
-	int distX = abs(end->position.x - current->position.x);
-	int distY = abs(end->position.y - current->position.y);
+	float distX = abs(end->position.x - current->position.x);
+	float distY = abs(end->position.y - current->position.y);
 
-	int distance = sqrt(distX * distX + distY * distY);
-
-	return distance;
+	float eucliDiandistance = sqrt(distX * distX + distY * distY);
 
 	//Manhatan Distance 
-	//return (abs(current->position.x - end->position.x) + abs(current->position.y - end->position.y));
+	//float manhatanDistance = (abs(current->position.x - end->position.x) + abs(current->position.y - end->position.y));
+
+	//Diagonal Distance
+	//float diagonalDistance = std::max(distX, distY);
+
+	return eucliDiandistance;
 }
 
 bool Grid::IsSearching()

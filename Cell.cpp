@@ -14,13 +14,12 @@ Cell::Cell(sf::Vector2f position) :
 	///*
 	std::random_device rd; // obtain a random number from hardware
 	std::mt19937 eng(rd()); // seed the generator
-	std::uniform_int_distribution<> distr(1, 3); // define the range
+	std::uniform_int_distribution<> distr(1, 10); // define the range
 	
 	if (distr(eng) % 3 == 0)
 		this->wall = true;
 	//*/
 }
-
 
 Cell::~Cell()
 {
@@ -34,7 +33,6 @@ Cell::Cell(const Cell &other)
 	this->h = other.h;
 	this->neighbors = other.neighbors;
 }
-
 
 void Cell::AddNeighbors(std::vector<Cell*> grid, int cols, int rows)
 {
